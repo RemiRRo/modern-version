@@ -1,0 +1,11 @@
+{
+  "name": "modern-version",
+  "version": "1.0.0",
+  "bin": {
+    "modern-version": "./bin/cli.js"
+  },
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "semver": "^7.3.8"
+  }
+}
