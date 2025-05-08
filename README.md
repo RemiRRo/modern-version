@@ -5,7 +5,7 @@ A feature-rich replacement for standard-version with enhanced capabilities
 
 ![version](https://img.shields.io/github/package-json/v/RemiRRo/modern-version)
 ![GitHub license](https://img.shields.io/github/license/RemiRRo/modern-version)
-![Tests](https://github.com/RemiRRo/modern-version/actions/workflows/test.yml/badge.svg)
+![Tests](https://github.com/RemiRRo/modern-version/actions/workflows/test.yaml/badge.svg)
 [![codecov](https://codecov.io/gh/RemiRRo/modern-version/branch/main/graph/badge.svg)](https://codecov.io/gh/RemiRRo/modern-version)
 
 ## 📦 Installation
