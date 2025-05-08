@@ -1,3 +1,4 @@
+// version-files.js
 const fs = require('fs');
 const semver = require('semver');
 
@@ -28,4 +29,4 @@ function calculateVersion(currentVersion, { prerelease, releaseAs }) {
         : semver.inc(currentVersion, 'patch');
 }
 
-module.exports = { bumpVersionInFiles };
+module.exports = { bumpVersionInFiles, calculateVersion };  // Добавляем экспорт calculateVersion

@@ -1,6 +1,23 @@
-/.idea/
-/node_modules/
+# Исключаем тесты и покрытие
+coverage/
+tests/
+*.test.js
+
+# Конфигурации CI
+.github/
+
+# Логи, кэш, временные файлы
 *.log
-.DS_Store
-.editorconfig
-.gitignore
+*.tsbuildinfo
+.cache/
+.nyc_output/
+
+# IDE, окружение
+.idea/
+.vscode/
+.env
+.env.*
+
+# Файлы только для разработки
+jest.config.js
+test.*

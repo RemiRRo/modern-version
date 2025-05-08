@@ -14,17 +14,24 @@ async function release(cliArgs) {
     const { newVersion } = bumpVersionInFiles(config, cliArgs, customVersion);
 
     await runHook('postbump', config, { newVersion });
-    await runHook('prechangelog', config);
-    generateChangelog(newVersion, config);
-    await runHook('postchangelog', config);
 
-    await runHook('precommit', config);
-    commitChanges(newVersion, config);
-    await runHook('postcommit', config);
+    // Пропускаем changelog если нужно
+    if (!cliArgs['skip-changelog']) {
+        await runHook('prechangelog', config);
+        generateChangelog(newVersion, config);
+        await runHook('postchangelog', config);
+    }
 
-    await runHook('pretag', config);
-    tagVersion(newVersion, config);
-    await runHook('posttag', config);
+    // Пропускаем commit/tag если dry-run
+    if (!cliArgs['dry-run']) {
+        await runHook('precommit', config);
+        commitChanges(newVersion, config);
+        await runHook('postcommit', config);
+
+        await runHook('pretag', config);
+        tagVersion(newVersion, config);
+        await runHook('posttag', config);
+    }
 
     console.log(`🚀 Released v${newVersion}`);
 }

@@ -21,4 +21,4 @@ function loadConfig() {
     }
 }
 
-module.exports = { loadConfig };
+module.exports = {loadConfig} ;

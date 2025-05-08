@@ -1,8 +1,14 @@
+// git.js
 const { execSync } = require('child_process');
 
 function commitChanges(version, config) {
     execSync('git add -A', { stdio: 'inherit' });
-    execSync(`git commit -m "${config.commitMessage || 'chore(release): v' + version}"`, { stdio: 'inherit' });
+
+    let message = config.commitMessage || 'chore(release): v' + version;
+    // Заменяем {version} на актуальную версию
+    message = message.replace(/\{version\}/g, version);
+
+    execSync(`git commit -m "${message}"`, { stdio: 'inherit' });
 }
 
 function tagVersion(version, config) {
