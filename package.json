@@ -1,8 +1,28 @@
 {
   "name": "modern-version",
   "version": "1.0.0",
+  "description": "Automated version management and CHANGELOG generation tool",
+  "author": "RemiRRo",
+  "license": "MIT",
+  "keywords": ["version", "changelog", "release", "automation"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RemiRRo/modern-version"
+  },
+  "homepage": "https://github.com/RemiRRo/modern-version#readme",
+  "bugs": {
+    "url": "https://github.com/RemiRRo/modern-version/issues"
+  },
+  "main": "src/index.js",
+  "files": [
+    "bin",
+    "src"
+  ],
   "bin": {
     "modern-version": "./bin/cli.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   },
   "dependencies": {
     "minimist": "^1.2.8",

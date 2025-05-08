@@ -5,7 +5,6 @@ A feature-rich replacement for standard-version with enhanced capabilities
 
 ![npm](https://img.shields.io/npm/v/modern-version)
 ![license](https://img.shields.io/npm/l/modern-version)
-![tests](https://img.shields.io/badge/tests-100%25-green)
 
 ## 📦 Installation
 
