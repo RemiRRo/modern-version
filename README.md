@@ -3,9 +3,8 @@
 **Automated Version Management and CHANGELOG Generation**  
 A feature-rich replacement for standard-version with enhanced capabilities
 
-![npm](https://img.shields.io/npm/v/modern-version)
-![license](https://img.shields.io/npm/l/modern-version)
-
+![version](https://img.shields.io/github/package-json/v/RemiRRo/modern-version)
+![GitHub license](https://img.shields.io/github/license/RemiRRo/modern-version)
 ## 📦 Installation
 
 ```bash
