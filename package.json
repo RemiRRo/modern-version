@@ -4,10 +4,15 @@
   "description": "Automated version management and CHANGELOG generation tool",
   "author": "RemiRRo",
   "license": "MIT",
-  "keywords": ["version", "changelog", "release", "automation"],
+  "keywords": [
+    "version",
+    "changelog",
+    "release",
+    "automation"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/RemiRRo/modern-version"
+    "url": "git+https://github.com/RemiRRo/modern-version.git"
   },
   "homepage": "https://github.com/RemiRRo/modern-version#readme",
   "bugs": {
@@ -19,7 +24,7 @@
     "src"
   ],
   "bin": {
-    "modern-version": "./bin/cli.js"
+    "modern-version": "bin/cli.js"
   },
   "engines": {
     "node": ">=14.0.0"
