@@ -4,27 +4,33 @@ const { filterValidCommits } = require('./validate');
 const { defaultConfig } = require('./config');
 
 function generateChangelog(newVersion, config) {
-    const { changelog: {
-        header,
-        types,
+    const mergedConfig = { ...defaultConfig, ...config };
+    const {
+      changelog: {
+        header = '# Changelog\n\n',
+        types = [],
         skip = {},
         repositoryUrl,
         footer = '',
-        skipInvalidCommits
-    } } = { ...defaultConfig, ...config };
+        skipInvalidCommits = true
+      } = {},
+      commits: prefilteredCommits
+    } = mergedConfig;
 
     const currentDate = new Date().toISOString().split('T')[0];
-
     let oldContent = '';
+
     try {
-        oldContent = fs.readFileSync(config.changelogFile || 'CHANGELOG.md', 'utf-8');
+      oldContent = fs.readFileSync(mergedConfig.changelogFile || 'CHANGELOG.md', 'utf-8');
     } catch (e) {
-        console.log('Creating new CHANGELOG.md');
+      console.log('Создаём новый CHANGELOG.md');
     }
 
-    const commits = config.changelog.skipInvalidCommits
-        ? filterValidCommits(config)
-        : execSync('git log --pretty=format:"%h %s"').toString().split('\n');
+    const commits = prefilteredCommits !== undefined
+      ? prefilteredCommits
+      : skipInvalidCommits
+        ? filterValidCommits(mergedConfig)
+        : execSync('git log --pretty=format:"%h %s"').toString().trim().split('\n');
 
     const groupedChanges = {};
     types.forEach(type => {
@@ -44,15 +50,14 @@ function generateChangelog(newVersion, config) {
     commits.forEach(line => {
         const [hash, ...messageParts] = line.split(' ');
         const message = messageParts.join(' ');
-        const match = message.match(/^(\w+)(?:\((.+)\))?:(.+)/);
+        const match = message.match(/^(\w+)(?:\((.+)\))?:\s(.+)/);
 
         if (!match && !skipInvalidCommits) {
-            // Невалидный коммит, но мы их не пропускаем
             groupedChanges.other.items.push(`- ${hash}: ${message}`);
             return;
         }
 
-        if (!match) return; // Пропускаем невалидные коммиты
+        if (!match) return; 
 
         const [, type, scope, desc] = match;
         const typeConfig = types.find(t => t.type === type);
@@ -70,10 +75,8 @@ function generateChangelog(newVersion, config) {
         }
     });
 
-    // Формируем новую запись
     let newEntry = `## v${newVersion} (${currentDate})\n\n`;
 
-    // Добавляем секции в CHANGELOG
     types.forEach(type => {
         if (groupedChanges[type.type]?.items.length > 0) {
             newEntry += `### ${groupedChanges[type.type].section}\n`;
