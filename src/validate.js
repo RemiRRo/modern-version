@@ -1,31 +1,44 @@
 const { execSync } = require('child_process');
 const { defaultConfig } = require('./config');
 
-function createCommitValidator(types) {
-    const typePattern = types.map(t => t.type).join('|');
-    const regex = new RegExp(`^(${typePattern})(\\(.+\\))?:`, 'g');
+function createCommitValidator(types = []) {
+  if (!Array.isArray(types)) {
+    console.error('⚠️ Config Error: "types" must be an array. Using default types.');
+    types = defaultConfig.changelog.types;
+  }
 
-    return (commit) => regex.test(commit);
+  const typePattern = types
+    .map(t => [t.type, ...(t.aliases || [])])
+    .flat()
+    .join('|');
+
+  return new RegExp(`^(${typePattern})(?:\\([\\w-]+\\))?:\\s.+$`, 'u');
 }
 
-function filterValidCommits(config = defaultConfig) {
-    const commits = execSync('git log --pretty=format:"%h %s"').toString().split('\n');
-    const invalidCommits = [];
+function filterValidCommits(config) {
+  const mergedConfig = { ...defaultConfig, ...config };
+  const commitValidator = createCommitValidator(mergedConfig.changelog?.types);
 
-    const isValidCommit = createCommitValidator(config.changelog.types);
+  const commits = execSync('git log --pretty=format:"%h %s"')
+    .toString()
+    .trim()
+    .split('\n')
+    .filter(Boolean);
 
-    const validCommits = commits.filter(commit => {
-        const isValid = isValidCommit(commit);
-        if (!isValid) invalidCommits.push(commit);
-        return isValid;
-    });
 
-    if (invalidCommits.length > 0) {
-        console.log('⚠️ Skipped invalid commits:');
-        invalidCommits.forEach(c => console.log(`- ${c}`));
-    }
 
-    return validCommits;
+  const valid = commits.filter(commit => {
+    const [hash, ...messageParts] = commit.split(' ');
+    const message = messageParts.join(' ');
+    return commitValidator.test(message);
+  });
+
+  if (valid.length === 0) {
+    console.log('Last commits:');
+    commits.slice(0, 5).forEach(c => console.log(`- ${c}`));
+  }
+
+  return valid;
 }
 
 module.exports = { filterValidCommits };
