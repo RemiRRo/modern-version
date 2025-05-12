@@ -1,11 +1,21 @@
 const { execSync } = require('child_process');
+const { defaultConfig } = require('./config');
 
-function filterValidCommits() {
+function createCommitValidator(types) {
+    const typePattern = types.map(t => t.type).join('|');
+    const regex = new RegExp(`^(${typePattern})(\\(.+\\))?:`, 'g');
+
+    return (commit) => regex.test(commit);
+}
+
+function filterValidCommits(config = defaultConfig) {
     const commits = execSync('git log --pretty=format:"%h %s"').toString().split('\n');
     const invalidCommits = [];
 
+    const isValidCommit = createCommitValidator(config.changelog.types);
+
     const validCommits = commits.filter(commit => {
-        const isValid = /^(feat|fix|chore|docs|style|refactor|perf|test)(\(.+\))?:/g.test(commit);
+        const isValid = isValidCommit(commit);
         if (!isValid) invalidCommits.push(commit);
         return isValid;
     });

@@ -22,8 +22,8 @@ function generateChangelog(newVersion, config) {
         console.log('Creating new CHANGELOG.md');
     }
 
-    const commits = skipInvalidCommits
-        ? filterValidCommits()
+    const commits = config.changelog.skipInvalidCommits
+        ? filterValidCommits(config)
         : execSync('git log --pretty=format:"%h %s"').toString().split('\n');
 
     const groupedChanges = {};
