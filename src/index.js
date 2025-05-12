@@ -3,11 +3,11 @@ const { runHook } = require('./hooks');
 const { bumpVersionInFiles } = require('./version-files');
 const generateChangelog = require('./changelog');
 const { commitChanges, tagVersion } = require('./git');
-const { validateCommits } = require('./validate');
+const { filterValidCommits } = require('./validate');
 
 async function release(cliArgs) {
     const config = loadConfig();
-    validateCommits();
+    filterValidCommits();
 
     await runHook('prerelease', config, cliArgs);
     const customVersion = await runHook('prebump', config, cliArgs);

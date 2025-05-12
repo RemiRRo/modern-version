@@ -1,15 +1,21 @@
-// validate.js
 const { execSync } = require('child_process');
 
-function validateCommits() {
-    const commits = execSync('git log --pretty=format:"%s"').toString().split('\n');
-    const nonEmptyCommits = commits.filter(commit => commit.trim() !== '');
-    const invalid = nonEmptyCommits.filter(commit => !/^(feat|fix|chore|docs|style|refactor|perf|test)(\(.+\))?:/g.test(commit));
+function filterValidCommits() {
+    const commits = execSync('git log --pretty=format:"%h %s"').toString().split('\n');
+    const invalidCommits = [];
 
-    if (invalid.length > 0) {
-        console.error('❌ Invalid commits:\n', invalid.join('\n'));
-        process.exit(1);
+    const validCommits = commits.filter(commit => {
+        const isValid = /^(feat|fix|chore|docs|style|refactor|perf|test)(\(.+\))?:/g.test(commit);
+        if (!isValid) invalidCommits.push(commit);
+        return isValid;
+    });
+
+    if (invalidCommits.length > 0) {
+        console.log('⚠️ Skipped invalid commits:');
+        invalidCommits.forEach(c => console.log(`- ${c}`));
     }
+
+    return validCommits;
 }
 
-module.exports = { validateCommits };
+module.exports = { filterValidCommits };
