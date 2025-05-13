@@ -14,16 +14,26 @@ function createCommitValidator(types = []) {
 
   return new RegExp(`^(${typePattern})(?:\\([\\w-]+\\))?:\\s.+$`, 'u');
 }
+function getLastVersionTag() {
+  try {
+    return execSync('git describe --tags --abbrev=0', { stdio: 'pipe' })
+        .toString()
+        .trim();
+  } catch (e) {
+    return null; // если тегов ещё нет (первый релиз)
+  }
+}
 
 function filterValidCommits(config) {
   const mergedConfig = { ...defaultConfig, ...config };
   const commitValidator = createCommitValidator(mergedConfig.changelog?.types);
 
-  const commits = execSync('git log --pretty=format:"%h %s"')
-    .toString()
-    .trim()
-    .split('\n')
-    .filter(Boolean);
+  const lastTag = getLastVersionTag();
+  const gitLogCommand = lastTag
+      ? `git log --pretty=format:"%h %s" ${lastTag}..HEAD` // commit after tag
+      : 'git log --pretty=format:"%h %s"'; // all commits (If the tag is absent)
+
+  const commits = execSync(gitLogCommand).toString().trim().split('\n').filter(Boolean);
 
 
 

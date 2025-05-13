@@ -7,7 +7,7 @@ function runHook(hookName, config, env = {}) {
     console.log(`Running ${hookName} hook...`);
     try {
         return execSync(script, {
-            stdio: 'inherit',
+            stdio: 'pipe',
             env: { ...process.env, ...env }
         }).toString().trim();
     } catch (error) {
