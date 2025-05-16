@@ -38,7 +38,7 @@ describe('runHook', () => {
 
         expect(result).toBe('hook output');
         expect(execSync).toHaveBeenCalledWith('echo "Running pre-release"', {
-            stdio: 'inherit',
+            stdio: 'pipe',
             env: expect.objectContaining({ foo: 'bar' })
         });
     });

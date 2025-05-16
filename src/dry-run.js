@@ -109,32 +109,34 @@ function pseudoGenerateChangelog(newVersion, config) {
   }
 
   console.log('📝[dry-run] Commits:', commits);
-  commits.forEach(line => {
-    const [hash, ...messageParts] = line.split(' ');
-    const message = messageParts.join(' ');
-    const match = message.match(/^(\w+)(?:\((.+)\))?:\s(.+)/);
-    if (!match && !skipInvalidCommits) {
-      // Невалидный коммит, но мы их не пропускаем
-      groupedChanges.other.items.push(`- ${hash}: ${message}`);
-      return;
-    }
+  if (commits?.length) {
+    commits.forEach(line => {
+      const [hash, ...messageParts] = line.split(' ');
+      const message = messageParts.join(' ');
+      const match = message.match(/^(\w+)(?:\((.+)\))?:\s(.+)/);
+      if (!match && !skipInvalidCommits) {
+        // Невалидный коммит, но мы их не пропускаем
+        groupedChanges.other.items.push(`- ${hash}: ${message}`);
+        return;
+      }
 
-    if (!match) return; // Пропускаем невалидные коммиты
+      if (!match) return; // Пропускаем невалидные коммиты
 
-    const [, type, scope, desc] = match;
-    const typeConfig = types.find(t => t.type === type);
+      const [, type, scope, desc] = match;
+      const typeConfig = types.find(t => t.type === type);
 
-    if (!typeConfig || skip[type]) return;
+      if (!typeConfig || skip[type]) return;
 
-    const linkedMessage = repositoryUrl
-      ? `[${hash}](${repositoryUrl}/commit/${hash}): ${desc.trim()}`
-      : `${hash}: ${desc.trim()}`;
-    if (groupedChanges[type]) {
-      groupedChanges[type].items.push(`- ${linkedMessage}`);
-    } else if (!skipInvalidCommits) {
-      groupedChanges.other.items.push(`- ${linkedMessage}`);
-    }
-  });
+      const linkedMessage = repositoryUrl
+          ? `[${hash}](${repositoryUrl}/commit/${hash}): ${desc.trim()}`
+          : `${hash}: ${desc.trim()}`;
+      if (groupedChanges[type]) {
+        groupedChanges[type].items.push(`- ${linkedMessage}`);
+      } else if (!skipInvalidCommits) {
+        groupedChanges.other.items.push(`- ${linkedMessage}`);
+      }
+    });
+  }
 
   // Формируем новую запись
   let newEntry = `## v${newVersion} (${currentDate})\n\n`;

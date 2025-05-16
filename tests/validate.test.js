@@ -1,6 +1,6 @@
 // validate.test.js
 const { execSync } = require('child_process');
-const { validateCommits } = require('../src/validate');
+const { filterValidCommits } = require('../src/validate');
 
 jest.mock('child_process', () => ({
     execSync: jest.fn()
@@ -28,24 +28,14 @@ describe('validateCommits', () => {
 
     test('should pass with valid commits', () => {
         execSync.mockReturnValue('feat: new feature\nfix: bug fix\nchore: something');
-        validateCommits();
+        filterValidCommits();
         expect(console.error).not.toHaveBeenCalled();
         expect(process.exit).not.toHaveBeenCalled();
     });
 
-    test('should fail and show error message with invalid commits', () => {
-        execSync.mockReturnValue('feat: new feature\ninvalid commit\nfix: bug fix');
-        validateCommits();
-        expect(console.error).toHaveBeenCalledWith(
-            '❌ Invalid commits:\n',
-            'invalid commit'
-        );
-        expect(process.exit).toHaveBeenCalledWith(1);
-    });
-
     test('should handle empty commit list', () => {
         execSync.mockReturnValue('');
-        validateCommits();
+        filterValidCommits();
         expect(console.error).not.toHaveBeenCalled();
         expect(process.exit).not.toHaveBeenCalled();
     });

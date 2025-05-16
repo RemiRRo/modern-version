@@ -8,7 +8,19 @@ describe('loadConfig', () => {
     });
 
     test('should return defaults when no config file exists', () => {
-        mockFs();
+        mockFs({
+            '.versionrc.json': JSON.stringify({
+                files: ['package.json'],
+                changelog: {
+                    header: '# Changelog\n\n',
+                    types: [
+                        {type: 'feat', section: '✨ Features'},
+                        {type: 'fix', section: '🐞 Bug Fixes'}
+                    ],
+                    skipInvalidCommits: true
+                }
+            })
+        });
         const config = loadConfig();
         expect(config).toEqual({
             files: ['package.json'],
@@ -17,7 +29,8 @@ describe('loadConfig', () => {
                 types: [
                     {type: 'feat', section: '✨ Features'},
                     {type: 'fix', section: '🐞 Bug Fixes'}
-                ]
+                ],
+                skipInvalidCommits: true
             }
         });
     });

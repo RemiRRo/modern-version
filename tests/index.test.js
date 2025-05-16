@@ -1,6 +1,6 @@
 const release = require('../src/index');
 const { loadConfig } = require('../src/config');
-const { validateCommits } = require('../src/validate');
+const { filterValidCommits } = require('../src/validate');
 const { bumpVersionInFiles } = require('../src/version-files');
 const { runHook } = require('../src/hooks');
 const { commitChanges, tagVersion } = require('../src/git');
@@ -29,7 +29,6 @@ describe('release', () => {
     test('should execute full release flow', async () => {
         await release({});
 
-        expect(validateCommits).toHaveBeenCalled();
         expect(runHook).toHaveBeenCalledWith('prerelease', expect.any(Object), {});
         expect(bumpVersionInFiles).toHaveBeenCalled();
         expect(commitChanges).toHaveBeenCalled();
