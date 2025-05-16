@@ -1,15 +1,26 @@
 # modern-version
 
 **Automated Version Management and CHANGELOG Generation**  
-A feature-rich replacement for standard-version with enhanced capabilities
+A feature-rich replacement for `standard-version` with enhanced capabilities, full lifecycle hooks, multi-file support, and commit validation.
 
 ![version](https://img.shields.io/github/package-json/v/RemiRRo/modern-version)
 ![GitHub license](https://img.shields.io/github/license/RemiRRo/modern-version)
 ![Tests](https://github.com/RemiRRo/modern-version/actions/workflows/test.yaml/badge.svg)
 [![codecov](https://codecov.io/gh/RemiRRo/modern-version/branch/main/graph/badge.svg)](https://codecov.io/gh/RemiRRo/modern-version)
 
-## 📦 Installation
+---
 
+## ✅ Recommended Commit Format
+
+We recommend using [Commitizen](https://github.com/commitizen/cz-cli) or [git-cz](https://github.com/typicode/husky#example-using-commitizen) to follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. This ensures your commit messages are parsed correctly and changelogs are generated accurately.
+
+Install and use with:
+
+```bash
+npm install --save-dev commitizen
+npx commitizen init cz-conventional-changelog --save-dev --save-exact
+```
+## 📦 Installation
 ```bash
 npm install --save-dev modern-version
 # or globally
@@ -18,7 +29,7 @@ npm install -g modern-version
 
 ## 🚀 Quick Start
 
-1. Add to your `package.json`:
+1. Add the release script to your `package.json`:
 ```json
 {
   "scripts": {
@@ -27,7 +38,7 @@ npm install -g modern-version
 }
 ```
 
-2. Run:
+2. Run a release:
 ```bash
 npm run release -- --release-as minor
 ```
@@ -43,7 +54,9 @@ Create `.versionrc.json` in your project root:
     "header": "# Change History\n\n",
     "types": [
       {"type": "feat", "section": "✨ Features"},
-      {"type": "fix", "section": "🐞 Bug Fixes"}
+      {"type": "fix", "section": "🐞 Bug Fixes"},
+      {"type": "chore", "section": "🔧 Maintenance", "hidden": false},
+      {"type": "docs", "section": "📚 Documentation"}
     ]
   }
 }
@@ -62,12 +75,15 @@ Create `.versionrc.json` in your project root:
     "issueUrlFormat": "{{host}}/issues/{{id}}",
     "types": [
       {"type": "feat", "section": "Features", "hidden": false},
-      {"type": "fix", "section": "Bug Fixes"}
+      {"type": "fix", "section": "Bug Fixes"},
+      {"type": "perf", "section": "Performance Improvements"},
+      {"type": "revert", "section": "Reverts"}
     ],
     "skip": {
       "chore": true,
       "docs": false
-    }
+    },
+    "skipInvalidCommits": true
   },
   "scripts": {
     "prerelease": "echo 'Starting release'",
@@ -78,32 +94,35 @@ Create `.versionrc.json` in your project root:
 
 ## 🛠 Complete Config Reference
 
-| Parameter | Type | Description | Default |
-|-----------|------|-------------|---------|
-| `files` | string[] | Files to bump version in | `["package.json"]` |
-| `packages` | boolean | Mono-repo mode | `false` |
-| `changelog.header` | string | CHANGELOG header | `"# CHANGELOG\n\n"` |
-| `changelog.footer` | string | Footer text (supports {{date}}) | `""` |
-| `changelog.repositoryUrl` | string | Repo URL for links | - |
-| `changelog.types` | object[] | Commit grouping settings | - |
-| `changelog.skip` | object | Commit types to skip | - |
-| `scripts` | object | Lifecycle hooks | - |
+| Parameter                 | Type      | Description                           | Default                      |
+| ------------------------- | --------- | ------------------------------------- | ---------------------------- |
+| `files`                   | string\[] | Files to bump version in              | `["package.json"]`           |
+| `packages`                | boolean   | Enable monorepo mode                  | `false`                      |
+| `commitMessage`           | string    | Custom commit message                 | `chore(release): v{version}` |
+| `changelog.header`        | string    | Changelog header                      | `"# CHANGELOG\n\n"`          |
+| `changelog.footer`        | string    | Footer text (supports `{{date}}`)     | `""`                         |
+| `changelog.repositoryUrl` | string    | Repository URL for links              |                              |
+| `changelog.types`         | object\[] | Grouping for commit types             |                              |
+| `changelog.skip`          | object    | Types of commits to skip in changelog |                              |
+| `scripts`                 | object    | Lifecycle hook commands               |                              |
+
 
 ## 🔄 Lifecycle Hooks
 
 Complete list of available hooks:
 
-| Hook | Description | Can Return |
-|------|-------------|------------|
-| `prerelease` | Before release starts | - |
-| `prebump` | Before version bump | New version (overrides calculation) |
-| `postbump` | After version bump | - |
-| `prechangelog` | Before CHANGELOG generation | - |
-| `postchangelog` | After CHANGELOG generation | - |
-| `precommit` | Before commit | - |
-| `postcommit` | After commit | - |
-| `pretag` | Before tag creation | - |
-| `posttag` | After tag creation | - |
+| Hook            | Description                 | Return Value           |
+| --------------- | --------------------------- | ---------------------- |
+| `prerelease`    | Before the release starts   | -                      |
+| `prebump`       | Before version bump         | New version (override) |
+| `postbump`      | After version bump          | -                      |
+| `prechangelog`  | Before changelog generation | -                      |
+| `postchangelog` | After changelog generation  | -                      |
+| `precommit`     | Before committing changes   | -                      |
+| `postcommit`    | After committing changes    | -                      |
+| `pretag`        | Before creating a Git tag   | -                      |
+| `posttag`       | After tag creation          | -                      |
+
 
 ### Hook Usage Example
 ```json
@@ -122,14 +141,15 @@ Complete list of available hooks:
 modern-version [options]
 ```
 
-| Option | Description | Example |
-|--------|-------------|---------|
-| `--release-as` | Specify version explicitly | `--release-as 1.2.3` |
-| `--prerelease` | Create pre-release | `--prerelease alpha` |
-| `--dry-run` | Dry run mode | `--dry-run` |
-| `--skip.commit` | Skip commit | `--skip.commit` |
-| `--skip.tag` | Skip tag | `--skip.tag` |
-| `--silent` | Minimal output | `--silent` |
+| Option          | Description                   | Example              |
+| --------------- | ----------------------------- | -------------------- |
+| `--release-as`  | Specify the release version   | `--release-as 1.2.3` |
+| `--prerelease`  | Mark as a pre-release         | `--prerelease beta`  |
+| `--dry-run`     | Run without changing anything | `--dry-run`          |
+| `--skip.commit` | Skip git commit               | `--skip.commit`      |
+| `--skip.tag`    | Skip git tag creation         | `--skip.tag`         |
+| `--silent`      | Suppress output               | `--silent`           |
+
 
 ## 📌 Usage Examples
 
@@ -179,4 +199,4 @@ npm test
 
 ## 📜 License
 
-MIT © 2023 [RemiRRo]
+MIT © 2025 [RemiRRo]

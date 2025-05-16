@@ -1,0 +1,12 @@
+{
+  "changelog": {
+    "header": "# CHANGELOG\n\n",
+    "types": [
+      {"type": "feat", "section": "✨ Features"},
+      {"type": "fix", "section": "🐞 Bug Fixes"},
+      {"type": "chore", "section": "🔧 Maintenance", "hidden": false},
+      {"type": "docs", "section": "📚 Documentation"}
+    ],
+    "repositoryUrl": "https://github.com/RemiRRo/modern-version"
+  }
+}
