@@ -1,6 +1,6 @@
 {
   "name": "modern-version",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Automated version management and CHANGELOG generation tool",
   "author": "RemiRRo",
   "license": "MIT",
@@ -33,6 +33,7 @@
     "commit": "git add . && git-cz",
     "release": "modern-version",
     "release:check": "modern-version --dry-run",
+    "release-publish": "npm run release && npm publish",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
