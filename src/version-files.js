@@ -79,7 +79,6 @@ function calculateVersion(currentVersion, cliArgs) {
         return semver.inc(currentVersion, 'prerelease', prerelease);
     }
 
-    // Если ничего не указано, увеличиваем патч
     return semver.inc(currentVersion, 'patch');
 }
 

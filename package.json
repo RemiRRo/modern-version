@@ -1,6 +1,6 @@
 {
   "name": "modern-version",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Automated version management and CHANGELOG generation tool",
   "author": "RemiRRo",
   "license": "MIT",
@@ -47,7 +47,7 @@
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "jest": "^29.7.0",
-    "modern-version": "^1.4.1"
+    "modern-version": "^1.4.2"
   },
   "config": {
     "commitizen": {

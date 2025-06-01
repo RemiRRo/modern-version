@@ -1,12 +1,23 @@
 {
+  "files": ["package.json", "package-lock.json"],
   "changelog": {
     "header": "# CHANGELOG\n\n",
     "types": [
-      {"type": "feat", "section": "✨ Features"},
-      {"type": "fix", "section": "🐞 Bug Fixes"},
-      {"type": "chore", "section": "🔧 Maintenance", "hidden": false},
-      {"type": "docs", "section": "📚 Documentation"}
+      { "type": "feat", "section": "✨ Новое" },
+      { "type": "features", "section": "✨ Новое" },
+      { "type": "feature", "section": "✨ Новое" },
+      { "type": "fix", "section": "🐞 Исправлено" },
+      { "type": "bugfixes", "section": "🐞 Исправлено" },
+      { "type": "docs", "section": "📝 Документация" },
+      { "type": "documentation", "section": "📝 Документация" },
+      { "type": "perf", "section": "⚡ Производительность" },
+      { "type": "performance", "section": "⚡ Производительность" },
+      { "type": "refactor", "section": "🔧 Рефакторинг" },
+      { "type": "tests", "section": "✅ Тесты" },
+      { "type": "chore", "section": "🔩 Обслуживание" },
+      { "type": "style", "section": "🎨 Стиль" }
     ],
-    "repositoryUrl": "https://github.com/RemiRRo/modern-version"
+    "repositoryUrl": "https://github.com/RemiRRo/modern-version",
+    "skipInvalidCommits": true
   }
 }

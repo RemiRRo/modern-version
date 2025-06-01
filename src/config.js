@@ -29,8 +29,7 @@ function loadConfig() {
 
 function deepMerge(target, source) {
   if (Array.isArray(target) && Array.isArray(source)) {
-    // Просто берём массив source, либо можешь сделать Array.concat если нужно сливать
-    return source; // или target.concat(source) если надо объединять
+    return source;
   }
   if (target instanceof Object && source instanceof Object) {
     const result = { ...target };

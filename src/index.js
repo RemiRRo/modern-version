@@ -10,7 +10,6 @@ const {filterValidCommits} = require('./validate');
 async function release(cliArgs) {
   const config = loadConfig();
 
-  // Получаем коммиты (с обработкой пустых строк)
   const commits = config.changelog.skipInvalidCommits
     ? filterValidCommits(config)
     : execSync('git log --pretty=format:"%h %s"')
