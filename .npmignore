@@ -17,6 +17,7 @@ tests/
 .vscode/
 .env
 .env.*
+.gigaide/
 
 # Файлы только для разработки
 jest.config.js

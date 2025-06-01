@@ -64,11 +64,14 @@ function updateFiles(files, newVersion) {
     });
 }
 
-function calculateVersion(currentVersion, { prerelease, releaseAs }) {
-    if (releaseAs) {
-        if (!semver.valid(releaseAs)) {
-            throw new Error(`Invalid version: ${releaseAs}`);
-        }
+function calculateVersion(currentVersion, cliArgs) {
+    const releaseAs = cliArgs['release-as'];
+    const prerelease = cliArgs['prerelease'];
+    if (['major', 'minor', 'patch'].includes(releaseAs)) {
+        return semver.inc(currentVersion, releaseAs);
+    }
+
+    if (semver.valid(releaseAs)) {
         return releaseAs;
     }
 
@@ -76,6 +79,7 @@ function calculateVersion(currentVersion, { prerelease, releaseAs }) {
         return semver.inc(currentVersion, 'prerelease', prerelease);
     }
 
+    // Если ничего не указано, увеличиваем патч
     return semver.inc(currentVersion, 'patch');
 }
 

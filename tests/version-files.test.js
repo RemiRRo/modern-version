@@ -40,12 +40,12 @@ describe('version-files', () => {
 
     describe('calculateVersion', () => {
         test('should calculate prerelease version', () => {
-            const result = calculateVersion('1.0.0', { prerelease: 'beta' });
+            const result = calculateVersion('1.0.0', { 'prerelease': 'beta' });
             expect(result).toBe('1.0.1-beta.0');
         });
 
         test('should use release-as if provided', () => {
-            const result = calculateVersion('1.0.0', { releaseAs: '2.0.0' });
+            const result = calculateVersion('1.0.0', { 'release-as': '2.0.0' });
             expect(result).toBe('2.0.0');
         });
 
