@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v1.4.5 (2026-03-31)
+
+### 📝 Документация
+- [518e907](https://github.com/RemiRRo/modern-version/commit/518e907): remove undocumented options and fix inaccuracies
+
 ## v1.4.4 (2026-03-31)
 
 ### 🐞 Исправлено
