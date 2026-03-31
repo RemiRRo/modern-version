@@ -2,6 +2,7 @@ const release = require('../src/index');
 const { loadConfig } = require('../src/config');
 const { filterValidCommits } = require('../src/validate');
 const { bumpVersionInFiles } = require('../src/version-files');
+const { pseudoBumpVersionInFiles, pseudoGenerateChangelog } = require('../src/dry-run');
 const { runHook } = require('../src/hooks');
 const { commitChanges, tagVersion } = require('../src/git');
 
@@ -10,6 +11,8 @@ jest.mock('../src/validate');
 jest.mock('../src/version-files');
 jest.mock('../src/hooks');
 jest.mock('../src/git');
+jest.mock('../src/dry-run');
+jest.mock('../src/changelog');
 
 describe('release', () => {
     beforeEach(() => {
@@ -23,6 +26,8 @@ describe('release', () => {
         });
 
         bumpVersionInFiles.mockReturnValue({ newVersion: '1.0.1' });
+        pseudoBumpVersionInFiles.mockReturnValue({ pseudoNewVersion: '1.0.1', filesChanged: [] });
+        pseudoGenerateChangelog.mockReturnValue('changelog preview');
         runHook.mockResolvedValue(undefined);
     });
 

@@ -32,7 +32,7 @@ async function release(cliArgs) {
     console.log(`🟦 [dry-run] Would be updated to: v${pseudoNewVersion}`);
     filesChanged.forEach(log => console.log(log))
     if (!cliArgs['skip-changelog']) {
-      const changelogPreview = pseudoGenerateChangelog(pseudoNewVersion, config);
+      const changelogPreview = pseudoGenerateChangelog(pseudoNewVersion, {...config, commits});
       console.log('✅ [dry-run] What will be added to Changelog:');
       console.log(changelogPreview);
     }

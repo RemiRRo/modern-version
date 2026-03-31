@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 const { filterValidCommits } = require('./validate');
 const { defaultConfig } = require('./config');
 
-function generateChangelog(newVersion, config) {
+function buildChangelogContent(newVersion, config) {
     const mergedConfig = { ...defaultConfig, ...config };
     const {
       changelog: {
@@ -23,7 +23,7 @@ function generateChangelog(newVersion, config) {
     try {
       oldContent = fs.readFileSync(mergedConfig.changelogFile || 'CHANGELOG.md', 'utf-8');
     } catch (e) {
-      console.log('Создаём новый CHANGELOG.md');
+      // File doesn't exist yet
     }
 
     const commits = prefilteredCommits !== undefined
@@ -57,7 +57,7 @@ function generateChangelog(newVersion, config) {
             return;
         }
 
-        if (!match) return; 
+        if (!match) return;
 
         const [, type, scope, desc] = match;
         const typeConfig = types.find(t => t.type === type);
@@ -92,8 +92,18 @@ function generateChangelog(newVersion, config) {
         newEntry += `---\n${footer}\n`;
     }
 
-    const newContent = header + newEntry + oldContent.replace(header, '');
-    fs.writeFileSync(config.changelogFile || 'CHANGELOG.md', newContent);
+    const normalizedOldContent = oldContent.replace(/\r\n/g, '\n');
+    // Remove any top-level markdown heading + trailing blank lines at the start of the file.
+    // This handles header changes in config and prevents duplication regardless of
+    // what the previous header text was.
+    const body = normalizedOldContent.replace(/^# .+\n+/gm, '');
+    return header + newEntry + body;
+}
+
+function generateChangelog(newVersion, config) {
+    const content = buildChangelogContent(newVersion, config);
+    fs.writeFileSync(config.changelogFile || 'CHANGELOG.md', content);
 }
 
 module.exports = generateChangelog;
+module.exports.buildChangelogContent = buildChangelogContent;
