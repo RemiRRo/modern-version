@@ -55,7 +55,7 @@ Create `.versionrc.json` in your project root:
     "types": [
       {"type": "feat", "section": "✨ Features"},
       {"type": "fix", "section": "🐞 Bug Fixes"},
-      {"type": "chore", "section": "🔧 Maintenance", "hidden": false},
+      {"type": "chore", "section": "🔧 Maintenance"},
       {"type": "docs", "section": "📚 Documentation"}
     ]
   }
@@ -66,15 +66,12 @@ Create `.versionrc.json` in your project root:
 ```json
 {
   "files": ["package.json", "manifest.json"],
-  "packages": false,
   "changelog": {
     "header": "# CHANGELOG\n\n",
-    "footer": "Automatically generated on {{date}}",
+    "footer": "Automatically generated",
     "repositoryUrl": "https://github.com/your/repo",
-    "commitUrlFormat": "{{host}}/commit/{{hash}}",
-    "issueUrlFormat": "{{host}}/issues/{{id}}",
     "types": [
-      {"type": "feat", "section": "Features", "hidden": false},
+      {"type": "feat", "section": "Features"},
       {"type": "fix", "section": "Bug Fixes"},
       {"type": "perf", "section": "Performance Improvements"},
       {"type": "revert", "section": "Reverts"}
@@ -97,10 +94,9 @@ Create `.versionrc.json` in your project root:
 | Parameter                 | Type      | Description                           | Default                      |
 | ------------------------- | --------- | ------------------------------------- | ---------------------------- |
 | `files`                   | string\[] | Files to bump version in              | `["package.json"]`           |
-| `packages`                | boolean   | Enable monorepo mode                  | `false`                      |
 | `commitMessage`           | string    | Custom commit message                 | `chore(release): v{version}` |
-| `changelog.header`        | string    | Changelog header                      | `"# CHANGELOG\n\n"`          |
-| `changelog.footer`        | string    | Footer text (supports `{{date}}`)     | `""`                         |
+| `changelog.header`        | string    | Changelog header                      | `"# Changelog\n\n"`          |
+| `changelog.footer`        | string    | Footer text                           | `""`                         |
 | `changelog.repositoryUrl` | string    | Repository URL for links              |                              |
 | `changelog.types`         | object\[] | Grouping for commit types             |                              |
 | `changelog.skip`          | object    | Types of commits to skip in changelog |                              |
@@ -141,14 +137,12 @@ Complete list of available hooks:
 modern-version [options]
 ```
 
-| Option          | Description                   | Example              |
-| --------------- | ----------------------------- | -------------------- |
-| `--release-as`  | Specify the release version   | `--release-as 1.2.3` |
-| `--prerelease`  | Mark as a pre-release         | `--prerelease beta`  |
-| `--dry-run`     | Run without changing anything | `--dry-run`          |
-| `--skip.commit` | Skip git commit               | `--skip.commit`      |
-| `--skip.tag`    | Skip git tag creation         | `--skip.tag`         |
-| `--silent`      | Suppress output               | `--silent`           |
+| Option             | Description                      | Example              |
+| ------------------ | -------------------------------- | -------------------- |
+| `--release-as`     | Specify the release version      | `--release-as 1.2.3` |
+| `--prerelease`     | Mark as a pre-release            | `--prerelease beta`  |
+| `--dry-run`        | Run without changing anything    | `--dry-run`          |
+| `--skip-changelog` | Skip changelog generation        | `--skip-changelog`   |
 
 
 ## 📌 Usage Examples
@@ -170,9 +164,9 @@ modern-version --release-as major
 modern-version --prerelease beta
 ```
 
-### Skip Specific Steps
+### Skip Changelog
 ```bash
-modern-version --skip.commit --skip.tag
+modern-version --skip-changelog
 ```
 
 ### Specific Version
