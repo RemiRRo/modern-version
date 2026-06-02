@@ -33,13 +33,24 @@ describe('runHook', () => {
     });
 
     test('should run hook script with env vars', () => {
-        const config = { scripts: { prerelease: 'echo "Running pre-release"' } };
-        const result = runHook('prerelease', config, { foo: 'bar' });
+        const config = { scripts: { precommit: 'npm run test' } };
+        const result = runHook('precommit', config, { foo: 'bar' });
+
+        expect(result).toBeNull();
+        expect(execSync).toHaveBeenCalledWith('npm run test', {
+            stdio: 'inherit',
+            env: expect.objectContaining({ foo: 'bar' })
+        });
+    });
+
+    test('should capture prebump output as custom version', () => {
+        const config = { scripts: { prebump: 'echo "1.2.3"' } };
+        const result = runHook('prebump', config);
 
         expect(result).toBe('hook output');
-        expect(execSync).toHaveBeenCalledWith('echo "Running pre-release"', {
+        expect(execSync).toHaveBeenCalledWith('echo "1.2.3"', {
             stdio: 'pipe',
-            env: expect.objectContaining({ foo: 'bar' })
+            env: expect.any(Object)
         });
     });
 

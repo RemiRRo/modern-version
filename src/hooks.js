@@ -6,10 +6,13 @@ function runHook(hookName, config, env = {}) {
 
     console.log(`Running ${hookName} hook...`);
     try {
-        return execSync(script, {
-            stdio: 'pipe',
+        const shouldCaptureOutput = hookName === 'prebump';
+        const output = execSync(script, {
+            stdio: shouldCaptureOutput ? 'pipe' : 'inherit',
             env: { ...process.env, ...env }
-        }).toString().trim();
+        });
+
+        return shouldCaptureOutput ? output.toString().trim() : null;
     } catch (error) {
         if (hookName === 'prerelease') process.exit(1);
         throw error;
