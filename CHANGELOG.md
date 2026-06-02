@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v1.4.6 (2026-06-02)
+
+### 🐞 Исправлено
+- [613145b](https://github.com/RemiRRo/modern-version/commit/613145b): stream lifecycle hook output
+- [00a3166](https://github.com/RemiRRo/modern-version/commit/00a3166): limit changelog preview output
+
 ## v1.4.5 (2026-03-31)
 
 ### 📝 Документация
