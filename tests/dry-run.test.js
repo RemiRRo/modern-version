@@ -1,0 +1,23 @@
+const { limitChangelogPreview } = require('../src/dry-run');
+
+describe('dry-run changelog preview', () => {
+  test('limits changelog output to the newest three versions', () => {
+    const preview = limitChangelogPreview(
+      '# CHANGELOG\n\n' +
+      '## v1.0.4 (2026-01-04)\n\n- newest\n\n' +
+      '## v1.0.3 (2026-01-03)\n\n- previous\n\n' +
+      '## v1.0.2 (2026-01-02)\n\n- previous\n\n' +
+      '## v1.0.1 (2026-01-01)\n\n- old\n'
+    );
+
+    expect(preview).toContain('# CHANGELOG');
+    expect(preview).toContain('## v1.0.4');
+    expect(preview).toContain('## v1.0.3');
+    expect(preview).toContain('## v1.0.2');
+    expect(preview).not.toContain('## v1.0.1');
+  });
+
+  test('returns non-version changelog content unchanged', () => {
+    expect(limitChangelogPreview('# CHANGELOG\n\nNo releases yet')).toBe('# CHANGELOG\n\nNo releases yet');
+  });
+});
