@@ -4,12 +4,12 @@ const { buildChangelogContent } = require('./changelog');
 
 const DRY_RUN_CHANGELOG_VERSION_LIMIT = 3;
 
-function pseudoBumpVersionInFiles(config, cliArgs, customVersion) {
+function pseudoBumpVersionInFiles(config, cliArgs, customVersion, commits = []) {
   try {
     const filesToUpdate = getFilesToUpdate(config);
     const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
     const currentVersion = pkg.version;
-    const pseudoNewVersion = customVersion || calculateVersion(currentVersion, cliArgs);
+    const pseudoNewVersion = customVersion || calculateVersion(currentVersion, cliArgs, commits, config);
     const filesChanged = filesToUpdate.map(file =>
       `📦[dry-run] File: ${file} from the current version ${currentVersion} would be updated to the version ${pseudoNewVersion} `
     );

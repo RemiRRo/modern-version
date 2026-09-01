@@ -1,6 +1,5 @@
 const fs = require('fs');
-const { execSync } = require('child_process');
-const { filterValidCommits } = require('./validate');
+const { filterValidCommits, getGitCommits } = require('./validate');
 const { defaultConfig } = require('./config');
 
 function buildChangelogContent(newVersion, config) {
@@ -30,7 +29,7 @@ function buildChangelogContent(newVersion, config) {
       ? prefilteredCommits
       : skipInvalidCommits
         ? filterValidCommits(mergedConfig)
-        : execSync('git log --pretty=format:"%h %s"').toString().trim().split('\n');
+        : getGitCommits();
 
     const groupedChanges = {};
     types.forEach(type => {
@@ -47,19 +46,23 @@ function buildChangelogContent(newVersion, config) {
         };
     }
 
-    commits.forEach(line => {
-        const [hash, ...messageParts] = line.split(' ');
-        const message = messageParts.join(' ');
-        const match = message.match(/^(\w+)(?:\((.+)\))?:\s(.+)/);
+    const breakingChanges = [];
+
+    commits.forEach(commit => {
+        const parsedCommit = parseCommit(commit);
+        if (!parsedCommit) return;
+
+        const { hash, subject, body } = parsedCommit;
+        const match = subject.match(/^(\w+)(?:\((.+)\))?(!)?:\s(.+)/);
 
         if (!match && !skipInvalidCommits) {
-            groupedChanges.other.items.push(`- ${hash}: ${message}`);
+            groupedChanges.other.items.push(`- ${hash}: ${subject}`);
             return;
         }
 
         if (!match) return;
 
-        const [, type, scope, desc] = match;
+        const [, type, scope, breakingMarker, desc] = match;
         const typeConfig = types.find(t => t.type === type);
 
         if (!typeConfig || skip[type]) return;
@@ -67,6 +70,11 @@ function buildChangelogContent(newVersion, config) {
         const linkedMessage = repositoryUrl
             ? `[${hash}](${repositoryUrl}/commit/${hash}): ${desc.trim()}`
             : `${hash}: ${desc.trim()}`;
+
+        const breakingDetails = getBreakingChangeDetails(body);
+        if (breakingMarker || breakingDetails) {
+            breakingChanges.push(formatBreakingChange(hash, desc, breakingDetails, repositoryUrl));
+        }
 
         if (groupedChanges[type]) {
             groupedChanges[type].items.push(`- ${linkedMessage}`);
@@ -76,6 +84,11 @@ function buildChangelogContent(newVersion, config) {
     });
 
     let newEntry = `## v${newVersion} (${currentDate})\n\n`;
+
+    if (breakingChanges.length > 0) {
+        newEntry += '### ⚠️ Breaking Changes\n';
+        newEntry += breakingChanges.join('\n') + '\n\n';
+    }
 
     types.forEach(type => {
         if (groupedChanges[type.type]?.items.length > 0) {
@@ -100,6 +113,50 @@ function buildChangelogContent(newVersion, config) {
     return header + newEntry + body;
 }
 
+function parseCommit(commit) {
+    if (typeof commit === 'string') {
+        const [hash, ...messageParts] = commit.split(' ');
+        const subject = messageParts.join(' ');
+        return { hash, subject, body: subject };
+    }
+
+    if (!commit || !commit.hash || !commit.subject) return null;
+
+    return {
+        hash: commit.hash,
+        subject: commit.subject,
+        body: commit.body || commit.subject
+    };
+}
+
+function getBreakingChangeDetails(body) {
+    const match = body.match(/(?:^|\n)BREAKING[ -]CHANGE:\s*([\s\S]*?)(?=\n[A-Z][A-Z -]+:\s|\n#{1,6}\s|$)/);
+    return match ? match[1].trim() : '';
+}
+
+function formatBreakingChange(hash, description, details, repositoryUrl) {
+    const summary = repositoryUrl
+        ? `[${hash}](${repositoryUrl}/commit/${hash}): ${description.trim()}`
+        : `${hash}: ${description.trim()}`;
+
+    if (!details) {
+        return `- ${summary}`;
+    }
+
+    return [
+        `- **${summary}**`,
+        '',
+        indentMarkdown(details, '  ')
+    ].join('\n');
+}
+
+function indentMarkdown(text, indent) {
+    return text
+        .split(/\r?\n/)
+        .map(line => line ? `${indent}${line}` : '')
+        .join('\n');
+}
+
 function generateChangelog(newVersion, config) {
     const content = buildChangelogContent(newVersion, config);
     fs.writeFileSync(config.changelogFile || 'CHANGELOG.md', content);
@@ -107,3 +164,4 @@ function generateChangelog(newVersion, config) {
 
 module.exports = generateChangelog;
 module.exports.buildChangelogContent = buildChangelogContent;
+module.exports.getBreakingChangeDetails = getBreakingChangeDetails;

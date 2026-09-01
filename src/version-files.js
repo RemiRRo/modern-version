@@ -2,12 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const semver = require('semver');
 
-function bumpVersionInFiles(config, cliArgs, customVersion) {
+function bumpVersionInFiles(config, cliArgs, customVersion, commits = []) {
     try {
         const filesToUpdate = getFilesToUpdate(config);
         const pkg = readPackageJson();
         const currentVersion = pkg.version;
-        const newVersion = customVersion || calculateVersion(currentVersion, cliArgs);
+        const newVersion = customVersion || calculateVersion(currentVersion, cliArgs, commits, config);
 
         updateFiles(filesToUpdate, newVersion);
 
@@ -64,7 +64,46 @@ function updateFiles(files, newVersion) {
     });
 }
 
-function calculateVersion(currentVersion, cliArgs) {
+function detectBump(commits, config = {}) {
+    const minorTypes = config.bumpTypes?.minor || ['feat', 'features', 'feature'];
+    const typePattern = minorTypes.map(escapeRegex).join('|');
+    const minorRegex = typePattern
+        ? new RegExp(`^(${typePattern})(\\([^)]*\\))?!?:`)
+        : null;
+
+    return commits.some(commit => {
+        const subject = getCommitSubject(commit);
+        return isBreakingCommit(commit, subject) || minorRegex?.test(subject);
+    }) ? 'minor' : 'patch';
+}
+
+function isBreakingCommit(commit, subject = getCommitSubject(commit)) {
+    if (/^\w+(?:\([^)]*\))?!:/.test(subject)) {
+        return true;
+    }
+
+    const body = typeof commit === 'string' ? subject : commit?.body || subject;
+    return /(?:^|\r?\n)BREAKING[ -]CHANGE:\s*\S/.test(body);
+}
+
+function getCommitSubject(commit) {
+    if (typeof commit === 'string') {
+        if (/^\w+(?:\([^)]*\))?!?:/.test(commit)) {
+            return commit;
+        }
+
+        const [, ...messageParts] = commit.split(' ');
+        return messageParts.join(' ');
+    }
+
+    return commit?.subject || '';
+}
+
+function escapeRegex(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function calculateVersion(currentVersion, cliArgs, commits = [], config = {}) {
     const releaseAs = cliArgs['release-as'];
     const prerelease = cliArgs['prerelease'];
     if (['major', 'minor', 'patch'].includes(releaseAs)) {
@@ -79,10 +118,11 @@ function calculateVersion(currentVersion, cliArgs) {
         return semver.inc(currentVersion, 'prerelease', prerelease);
     }
 
-    return semver.inc(currentVersion, 'patch');
+    return semver.inc(currentVersion, detectBump(commits, config));
 }
 
 module.exports = {
     bumpVersionInFiles,
-    calculateVersion
+    calculateVersion,
+    detectBump
 };

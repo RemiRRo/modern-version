@@ -4,20 +4,21 @@
     "header": "# CHANGELOG\n\n",
     "types": [
       { "type": "feat", "section": "✨ Новое" },
-      { "type": "features", "section": "✨ Новое" },
-      { "type": "feature", "section": "✨ Новое" },
       { "type": "fix", "section": "🐞 Исправлено" },
-      { "type": "bugfixes", "section": "🐞 Исправлено" },
       { "type": "docs", "section": "📝 Документация" },
-      { "type": "documentation", "section": "📝 Документация" },
-      { "type": "perf", "section": "⚡ Производительность" },
-      { "type": "performance", "section": "⚡ Производительность" },
+      { "type": "style", "section": "🎨 Стиль" },
       { "type": "refactor", "section": "🔧 Рефакторинг" },
-      { "type": "tests", "section": "✅ Тесты" },
+      { "type": "perf", "section": "⚡ Производительность" },
+      { "type": "test", "section": "✅ Тесты" },
+      { "type": "build", "section": "🏗️ Сборка" },
+      { "type": "ci", "section": "👷 CI" },
       { "type": "chore", "section": "🔩 Обслуживание" },
-      { "type": "style", "section": "🎨 Стиль" }
+      { "type": "revert", "section": "⏪ Откаты" }
     ],
     "repositoryUrl": "https://github.com/RemiRRo/modern-version",
     "skipInvalidCommits": true
+  },
+  "bumpTypes": {
+    "minor": ["feat"]
   }
 }

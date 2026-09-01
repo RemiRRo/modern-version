@@ -31,6 +31,9 @@ describe('loadConfig', () => {
                     {type: 'fix', section: '🐞 Bug Fixes'}
                 ],
                 skipInvalidCommits: true
+            },
+            bumpTypes: {
+                minor: ['feat', 'features', 'feature']
             }
         });
     });

@@ -21,10 +21,11 @@ describe('release', () => {
 
         loadConfig.mockReturnValue({
             files: ['package.json'],
-            changelog: {},
+            changelog: { skipInvalidCommits: true },
             scripts: {}
         });
 
+        filterValidCommits.mockReturnValue(['abc123 fix: test change']);
         bumpVersionInFiles.mockReturnValue({ newVersion: '1.0.1' });
         pseudoBumpVersionInFiles.mockReturnValue({ pseudoNewVersion: '1.0.1', filesChanged: [] });
         pseudoGenerateChangelog.mockReturnValue('changelog preview');

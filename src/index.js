@@ -5,18 +5,14 @@ const {bumpVersionInFiles} = require('./version-files');
 const {pseudoBumpVersionInFiles, pseudoGenerateChangelog} = require('./dry-run');
 const generateChangelog = require('./changelog');
 const {commitChanges, tagVersion} = require('./git');
-const {filterValidCommits} = require('./validate');
+const {filterValidCommits, getGitCommits} = require('./validate');
 
 async function release(cliArgs) {
   const config = loadConfig();
 
   const commits = config.changelog.skipInvalidCommits
     ? filterValidCommits(config)
-    : execSync('git log --pretty=format:"%h %s"')
-      .toString()
-      .trim()
-      .split('\n')
-      .filter(Boolean);
+    : getGitCommits();
 
   if (commits.length === 0 && !cliArgs['dry-run']) {
     execSync('git log --pretty=format:"%h %s"').toString().split('\n').forEach(c => console.log(`- ${c}`));
@@ -27,7 +23,7 @@ async function release(cliArgs) {
   const customVersion = await runHook('prebump', config, cliArgs);
 
   if (cliArgs['dry-run']) {
-    const {pseudoNewVersion, filesChanged} = pseudoBumpVersionInFiles(config, cliArgs, customVersion);
+    const {pseudoNewVersion, filesChanged} = pseudoBumpVersionInFiles(config, cliArgs, customVersion, commits);
     // --- logger only ---
     console.log(`🟦 [dry-run] Would be updated to: v${pseudoNewVersion}`);
     filesChanged.forEach(log => console.log(log))
@@ -39,7 +35,7 @@ async function release(cliArgs) {
     return;
   }
 
-  const { newVersion } = bumpVersionInFiles(config, cliArgs, customVersion);
+  const { newVersion } = bumpVersionInFiles(config, cliArgs, customVersion, commits);
 
 
   await runHook('postbump', config, {newVersion});

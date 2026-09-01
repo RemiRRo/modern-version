@@ -100,6 +100,7 @@ Create `.versionrc.json` in your project root:
 | `changelog.repositoryUrl` | string    | Repository URL for links              |                              |
 | `changelog.types`         | object\[] | Grouping for commit types             |                              |
 | `changelog.skip`          | object    | Types of commits to skip in changelog |                              |
+| `bumpTypes.minor`         | string\[] | Commit types that trigger minor bump  | `["feat", "features", "feature"]` |
 | `scripts`                 | object    | Lifecycle hook commands               |                              |
 
 
@@ -143,6 +144,10 @@ modern-version [options]
 | `--prerelease`     | Mark as a pre-release            | `--prerelease beta`  |
 | `--dry-run`        | Run without changing anything    | `--dry-run`          |
 | `--skip-changelog` | Skip changelog generation        | `--skip-changelog`   |
+
+Without `--release-as`, modern-version detects the bump type from commits since the last version tag.
+Commits with `feat`, `features`, or `feature` trigger a minor release; otherwise the release is a patch.
+Major releases are never detected automatically and must be requested explicitly with `--release-as major`.
 
 
 ## 📌 Usage Examples

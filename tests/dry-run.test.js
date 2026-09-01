@@ -1,6 +1,22 @@
+const mockFs = require('mock-fs');
 const { limitChangelogPreview } = require('../src/dry-run');
+const { pseudoBumpVersionInFiles } = require('../src/dry-run');
 
 describe('dry-run changelog preview', () => {
+  afterEach(() => {
+    mockFs.restore();
+  });
+
+  test('detects the same bump type as real release', () => {
+    mockFs({
+      'package.json': JSON.stringify({ version: '1.0.0' })
+    });
+
+    const result = pseudoBumpVersionInFiles({}, {}, undefined, ['abc123 feat: add feature']);
+
+    expect(result.pseudoNewVersion).toBe('1.1.0');
+  });
+
   test('limits changelog output to the newest three versions', () => {
     const preview = limitChangelogPreview(
       '# CHANGELOG\n\n' +
