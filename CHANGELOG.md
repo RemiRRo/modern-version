@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## v2.0.0 (2026-09-01)
+
+### ⚠️ Breaking Changes
+- **[016be34](https://github.com/RemiRRo/modern-version/commit/016be34): detect bump type from commits**
+
+  Running modern-version without release flags now derives the bump type from commits
+  and can produce a minor release instead of always producing a patch release. CI workflows that rely
+  on the previous default should pass --release-as patch explicitly.
+
+### ✨ Новое
+- [016be34](https://github.com/RemiRRo/modern-version/commit/016be34): detect bump type from commits
+
+### 🐞 Исправлено
+- [bf82099](https://github.com/RemiRRo/modern-version/commit/bf82099): stream prebump output safely
+
 ## v1.4.6 (2026-06-02)
 
 ### 🐞 Исправлено
