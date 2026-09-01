@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v2.0.1 (2026-09-01)
+
+### 📝 Документация
+- [316e5ca](https://github.com/RemiRRo/modern-version/commit/316e5ca): document bump and breaking change behavior
+
 ## v2.0.0 (2026-09-01)
 
 ### ⚠️ Breaking Changes
