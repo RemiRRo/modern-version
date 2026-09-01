@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v2.1.0 (2026-09-01)
+
+### ✨ Новое
+- [d84628f](https://github.com/RemiRRo/modern-version/commit/d84628f): add history regeneration command
+
+### 🔩 Обслуживание
+- [5c60597](https://github.com/RemiRRo/modern-version/commit/5c60597): update self dependency to 2.0.1
+
 ## v2.0.1 (2026-09-01)
 
 ### 📝 Документация
