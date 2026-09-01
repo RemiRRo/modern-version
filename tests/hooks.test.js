@@ -1,24 +1,49 @@
 // hooks.test.js
-const { execSync } = require('child_process');
-const { runHook } = require('../src/hooks');
+const { EventEmitter } = require('events');
+const { spawn } = require('child_process');
+const { runHook, getHookResult } = require('../src/hooks');
 
 jest.mock('child_process', () => ({
-    execSync: jest.fn(() => 'hook output')
+    spawn: jest.fn()
 }));
+
+function mockSpawn({ stdout = '', stderr = '', code = 0 } = {}) {
+    const child = new EventEmitter();
+    child.stdout = new EventEmitter();
+    child.stderr = new EventEmitter();
+
+    spawn.mockReturnValue(child);
+
+    process.nextTick(() => {
+        if (stdout) child.stdout.emit('data', Buffer.from(stdout));
+        if (stderr) child.stderr.emit('data', Buffer.from(stderr));
+        child.emit('close', code);
+    });
+
+    return child;
+}
 
 describe('runHook', () => {
     let originalExit;
     let originalError;
+    let originalStdoutWrite;
+    let originalStderrWrite;
 
     beforeAll(() => {
         originalExit = process.exit;
         originalError = console.error;
+        originalStdoutWrite = process.stdout.write;
+        originalStderrWrite = process.stderr.write;
         console.error = jest.fn();
+        process.stdout.write = jest.fn();
+        process.stderr.write = jest.fn();
     });
 
     afterAll(() => {
         process.exit = originalExit;
         console.error = originalError;
+        process.stdout.write = originalStdoutWrite;
+        process.stderr.write = originalStderrWrite;
     });
 
     beforeEach(() => {
@@ -26,41 +51,56 @@ describe('runHook', () => {
         console.log = jest.fn();
     });
 
-    test('should return null when no hook script', () => {
-        const result = runHook('prerelease', {});
+    test('should return null when no hook script', async () => {
+        const result = await runHook('prerelease', {});
         expect(result).toBeNull();
-        expect(execSync).not.toHaveBeenCalled();
+        expect(spawn).not.toHaveBeenCalled();
     });
 
-    test('should run hook script with env vars', () => {
+    test('should run hook script with env vars and stream output', async () => {
+        mockSpawn({ stdout: 'tests passed\n' });
         const config = { scripts: { precommit: 'npm run test' } };
-        const result = runHook('precommit', config, { foo: 'bar' });
+        const result = await runHook('precommit', config, { foo: 'bar' });
 
         expect(result).toBeNull();
-        expect(execSync).toHaveBeenCalledWith('npm run test', {
-            stdio: 'inherit',
+        expect(spawn).toHaveBeenCalledWith('npm run test', {
+            shell: true,
+            stdio: ['inherit', 'pipe', 'pipe'],
             env: expect.objectContaining({ foo: 'bar' })
         });
+        expect(process.stdout.write).toHaveBeenCalledWith(Buffer.from('tests passed\n'));
     });
 
-    test('should capture prebump output as custom version', () => {
+    test('should capture valid prebump version from the last output line', async () => {
+        mockSpawn({ stdout: 'running checks\n1.2.3\n' });
         const config = { scripts: { prebump: 'echo "1.2.3"' } };
-        const result = runHook('prebump', config);
+        const result = await runHook('prebump', config);
 
-        expect(result).toBe('hook output');
-        expect(execSync).toHaveBeenCalledWith('echo "1.2.3"', {
-            stdio: 'pipe',
-            env: expect.any(Object)
-        });
+        expect(result).toBe('1.2.3');
     });
 
-    test('should throw on other hook errors', () => {
-        execSync.mockImplementationOnce(() => {
-            throw new Error('hook failed');
-        });
+    test('should ignore non-version prebump output', async () => {
+        mockSpawn({ stdout: 'PASS tests/hooks.test.js\n' });
+        const config = { scripts: { prebump: 'npm run test' } };
+        const result = await runHook('prebump', config);
 
+        expect(result).toBeNull();
+    });
+
+    test('should throw on other hook errors', async () => {
+        mockSpawn({ code: 1 });
         const config = { scripts: { postcommit: 'fail' } };
 
-        expect(() => runHook('postcommit', config)).toThrow('hook failed');
+        await expect(runHook('postcommit', config)).rejects.toThrow('postcommit hook failed with exit code 1');
+    });
+});
+
+describe('getHookResult', () => {
+    test('should return null for non-prebump hooks', () => {
+        expect(getHookResult('precommit', '1.2.3\n')).toBeNull();
+    });
+
+    test('should return null when prebump output is not a valid version', () => {
+        expect(getHookResult('prebump', 'tests passed\n')).toBeNull();
     });
 });
