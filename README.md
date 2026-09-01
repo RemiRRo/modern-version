@@ -141,12 +141,13 @@ Complete list of available hooks:
 modern-version [options]
 ```
 
-| Option             | Description                      | Example              |
-| ------------------ | -------------------------------- | -------------------- |
-| `--release-as`     | Specify the release version      | `--release-as 1.2.3` |
-| `--prerelease`     | Mark as a pre-release            | `--prerelease beta`  |
-| `--dry-run`        | Run without changing anything    | `--dry-run`          |
-| `--skip-changelog` | Skip changelog generation        | `--skip-changelog`   |
+| Option                   | Description                              | Example                    |
+| ------------------------ | ---------------------------------------- | -------------------------- |
+| `--release-as`           | Specify the release version              | `--release-as 1.2.3`       |
+| `--prerelease`           | Mark as a pre-release                    | `--prerelease beta`        |
+| `--dry-run`              | Run without changing anything            | `--dry-run`                |
+| `--skip-changelog`       | Skip changelog generation                | `--skip-changelog`         |
+| `--regenerate-changelog` | Rebuild changelog from all version tags  | `--regenerate-changelog`   |
 
 ### Automatic Bump Policy
 
@@ -184,6 +185,24 @@ The footer is used both for bump detection and for a dedicated changelog section
 
 The commit also remains in its regular type section, such as `Bug Fixes`. Multiline breaking-change
 descriptions are preserved in the changelog.
+
+### Regenerate Changelog History
+
+Use the version tags reachable from the current branch to rebuild the complete changelog:
+
+```bash
+modern-version --regenerate-changelog --dry-run
+modern-version --regenerate-changelog
+```
+
+The dry run prints the rebuilt content without writing it. The second command overwrites the configured
+changelog file, but does not bump the package version, run release hooks, create a commit, or create a tag.
+Each section uses the date of its tag and the full commit body, so historical `BREAKING CHANGE:` footers are
+restored. Release commits such as `chore(release): v1.2.3` are excluded.
+
+Only tagged releases are rebuilt. The current changelog configuration controls grouping, skipped types, and
+section names; use the dry run to review how older commits map to the current configuration before overwriting
+the file.
 
 
 ## 📌 Usage Examples

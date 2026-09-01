@@ -4,11 +4,25 @@ const {runHook} = require('./hooks');
 const {bumpVersionInFiles} = require('./version-files');
 const {pseudoBumpVersionInFiles, pseudoGenerateChangelog} = require('./dry-run');
 const generateChangelog = require('./changelog');
+const regenerateChangelog = require('./regenerate-changelog');
 const {commitChanges, tagVersion} = require('./git');
 const {filterValidCommits, getGitCommits} = require('./validate');
 
 async function release(cliArgs) {
   const config = loadConfig();
+
+  if (cliArgs['regenerate-changelog']) {
+    const result = regenerateChangelog(config, { dryRun: Boolean(cliArgs['dry-run']) });
+
+    if (cliArgs['dry-run']) {
+      console.log(`📝 [dry-run] Would regenerate ${result.changelogFile} from ${result.tagCount} version tags:`);
+      console.log(result.content);
+    } else {
+      console.log(`✅ Regenerated ${result.changelogFile} from ${result.tagCount} version tags`);
+    }
+
+    return;
+  }
 
   const commits = config.changelog.skipInvalidCommits
     ? filterValidCommits(config)

@@ -4,9 +4,28 @@ const { defaultConfig } = require('./config');
 
 function buildChangelogContent(newVersion, config) {
     const mergedConfig = { ...defaultConfig, ...config };
+    const header = mergedConfig.changelog?.header || '# Changelog\n\n';
+    let oldContent = '';
+
+    try {
+      oldContent = fs.readFileSync(mergedConfig.changelogFile || 'CHANGELOG.md', 'utf-8');
+    } catch (e) {
+      // File doesn't exist yet
+    }
+
+    const newEntry = buildChangelogEntry(newVersion, mergedConfig);
+    const normalizedOldContent = oldContent.replace(/\r\n/g, '\n');
+    // Remove any top-level markdown heading + trailing blank lines at the start of the file.
+    // This handles header changes in config and prevents duplication regardless of
+    // what the previous header text was.
+    const body = normalizedOldContent.replace(/^# .+\n+/gm, '');
+    return header + newEntry + body;
+}
+
+function buildChangelogEntry(newVersion, config, releaseDate = new Date().toISOString().split('T')[0]) {
+    const mergedConfig = { ...defaultConfig, ...config };
     const {
       changelog: {
-        header = '# Changelog\n\n',
         types = [],
         skip = {},
         repositoryUrl,
@@ -15,15 +34,6 @@ function buildChangelogContent(newVersion, config) {
       } = {},
       commits: prefilteredCommits
     } = mergedConfig;
-
-    const currentDate = new Date().toISOString().split('T')[0];
-    let oldContent = '';
-
-    try {
-      oldContent = fs.readFileSync(mergedConfig.changelogFile || 'CHANGELOG.md', 'utf-8');
-    } catch (e) {
-      // File doesn't exist yet
-    }
 
     const commits = prefilteredCommits !== undefined
       ? prefilteredCommits
@@ -63,9 +73,9 @@ function buildChangelogContent(newVersion, config) {
         if (!match) return;
 
         const [, type, scope, breakingMarker, desc] = match;
-        const typeConfig = types.find(t => t.type === type);
+        const typeConfig = types.find(t => t.type === type || t.aliases?.includes(type));
 
-        if (!typeConfig || skip[type]) return;
+        if (skip[type] || (typeConfig && skip[typeConfig.type])) return;
 
         const linkedMessage = repositoryUrl
             ? `[${hash}](${repositoryUrl}/commit/${hash}): ${desc.trim()}`
@@ -76,14 +86,14 @@ function buildChangelogContent(newVersion, config) {
             breakingChanges.push(formatBreakingChange(hash, desc, breakingDetails, repositoryUrl));
         }
 
-        if (groupedChanges[type]) {
-            groupedChanges[type].items.push(`- ${linkedMessage}`);
+        if (typeConfig && groupedChanges[typeConfig.type]) {
+            groupedChanges[typeConfig.type].items.push(`- ${linkedMessage}`);
         } else if (!skipInvalidCommits) {
             groupedChanges.other.items.push(`- ${linkedMessage}`);
         }
     });
 
-    let newEntry = `## v${newVersion} (${currentDate})\n\n`;
+    let newEntry = `## v${newVersion} (${releaseDate})\n\n`;
 
     if (breakingChanges.length > 0) {
         newEntry += '### ⚠️ Breaking Changes\n';
@@ -105,12 +115,7 @@ function buildChangelogContent(newVersion, config) {
         newEntry += `---\n${footer}\n`;
     }
 
-    const normalizedOldContent = oldContent.replace(/\r\n/g, '\n');
-    // Remove any top-level markdown heading + trailing blank lines at the start of the file.
-    // This handles header changes in config and prevents duplication regardless of
-    // what the previous header text was.
-    const body = normalizedOldContent.replace(/^# .+\n+/gm, '');
-    return header + newEntry + body;
+    return newEntry;
 }
 
 function parseCommit(commit) {
@@ -164,4 +169,5 @@ function generateChangelog(newVersion, config) {
 
 module.exports = generateChangelog;
 module.exports.buildChangelogContent = buildChangelogContent;
+module.exports.buildChangelogEntry = buildChangelogEntry;
 module.exports.getBreakingChangeDetails = getBreakingChangeDetails;

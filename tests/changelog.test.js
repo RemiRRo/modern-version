@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { execSync } = require('child_process');
 const generateChangelog = require('../src/changelog');
+const { buildChangelogEntry } = require('../src/changelog');
 
 jest.mock('fs');
 jest.mock('child_process');
@@ -68,5 +69,20 @@ describe('generateChangelog', () => {
         expect(writtenContent).toContain('  configs now require an explicit project id.');
         expect(writtenContent).toContain('### undefined');
         expect(writtenContent).toContain('[def456](https://github.com/your/repo/commit/def456): change config defaults');
+    });
+
+    it('builds a standalone entry with the supplied tag date and type aliases', () => {
+        const entry = buildChangelogEntry('1.2.0', {
+            ...config,
+            changelog: {
+                ...config.changelog,
+                types: [{ type: 'feat', aliases: ['feature'], section: 'Features' }]
+            },
+            commits: [{ hash: 'abc123', subject: 'feature(ui): add panel', body: 'feature(ui): add panel' }]
+        }, '2024-03-10');
+
+        expect(entry).toContain('## v1.2.0 (2024-03-10)');
+        expect(entry).toContain('### Features');
+        expect(entry).toContain('add panel');
     });
 });
