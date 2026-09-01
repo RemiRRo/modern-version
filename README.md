@@ -82,6 +82,9 @@ Create `.versionrc.json` in your project root:
     },
     "skipInvalidCommits": true
   },
+  "bumpTypes": {
+    "minor": ["feat"]
+  },
   "scripts": {
     "prerelease": "echo 'Starting release'",
     "postchangelog": "prettier --write CHANGELOG.md"
@@ -100,7 +103,7 @@ Create `.versionrc.json` in your project root:
 | `changelog.repositoryUrl` | string    | Repository URL for links              |                              |
 | `changelog.types`         | object\[] | Grouping for commit types             |                              |
 | `changelog.skip`          | object    | Types of commits to skip in changelog |                              |
-| `bumpTypes.minor`         | string\[] | Commit types that trigger minor bump  | `["feat", "features", "feature"]` |
+| `bumpTypes.minor`         | string\[] | Commit types that trigger a minor bump | `["feat", "features", "feature"]` |
 | `scripts`                 | object    | Lifecycle hook commands               |                              |
 
 
@@ -145,9 +148,42 @@ modern-version [options]
 | `--dry-run`        | Run without changing anything    | `--dry-run`          |
 | `--skip-changelog` | Skip changelog generation        | `--skip-changelog`   |
 
-Without `--release-as`, modern-version detects the bump type from commits since the last version tag.
-Commits with `feat`, `features`, or `feature` trigger a minor release; otherwise the release is a patch.
-Major releases are never detected automatically and must be requested explicitly with `--release-as major`.
+### Automatic Bump Policy
+
+Without `--release-as`, modern-version detects the bump type from commits since the last version tag:
+
+- A commit whose type is listed in `bumpTypes.minor` triggers a minor release.
+- An accepted conventional commit with `!`, such as `fix(api)!: remove legacy endpoint`, triggers a minor release regardless of its type.
+- An accepted commit with a `BREAKING CHANGE:` or `BREAKING-CHANGE:` footer triggers a minor release regardless of its type.
+- If none of these conditions match, the release is a patch.
+
+Major releases are never detected automatically. Use `--release-as major` when a breaking change should produce a major release.
+When `changelog.skipInvalidCommits` is enabled, a commit must first match `changelog.types`; filtered commits do not affect the version or changelog.
+
+Previously, running modern-version without release flags always selected a patch bump. CI workflows that
+depend on that behavior should pass `--release-as patch` explicitly.
+
+### Breaking Change Commits
+
+`cz-conventional-changelog` records breaking changes in the commit body instead of adding `!` to the header:
+
+```text
+fix(card): align footer
+
+BREAKING CHANGE: removed the showFooter input; use the footer slot instead
+```
+
+The footer is used both for bump detection and for a dedicated changelog section:
+
+```md
+### ⚠️ Breaking Changes
+- **abc1234: align footer**
+
+  removed the showFooter input; use the footer slot instead
+```
+
+The commit also remains in its regular type section, such as `Bug Fixes`. Multiline breaking-change
+descriptions are preserved in the changelog.
 
 
 ## 📌 Usage Examples
